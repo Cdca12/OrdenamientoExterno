@@ -1,11 +1,12 @@
 package ordenamientoexterno;
 
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @titulo Ordenamiento Externo
@@ -21,8 +22,10 @@ public class AplOrdenamientoExterno {
         Scanner scanner = new Scanner(System.in);
         File archivo1 = null;
         File archivo2 = null;
+        File archivo3 = null;
         RandomAccessFile archivoIntercambio = null;
         RandomAccessFile archivoQuicksort = null;
+        RandomAccessFile archivoBurbuja = null;
 
         int opcion = 0, opcion2 = 0, opcion3 = 0, numeroRegistros = 0;
 
@@ -40,6 +43,13 @@ public class AplOrdenamientoExterno {
             System.out.println("El archivo " + archivo2.getName() + "  no se pudo abrir.");
             return;
         }
+        try {
+            archivo3 = new File("./archivos/archivoBurbuja.dat");
+            archivoBurbuja = new RandomAccessFile(archivo3, "rw");
+        } catch (FileNotFoundException e) {
+            System.out.println("El archivo " + archivo3.getName() + "  no se pudo abrir.");
+            return;
+        }
 
         while (opcion != 5) {
             System.out.println("\nProyecto: Ordenamiento Externo"
@@ -55,7 +65,8 @@ public class AplOrdenamientoExterno {
                 case 1: // 1. Generar archivo
                     System.out.println("\n¿Qué archivo desea generar?"
                             + "\n1. Archivo 1 (Intercambio)"
-                            + "\n2. Archivo 2 (Quicksort)");
+                            + "\n2. Archivo 2 (Quicksort)"
+                            + "\n3. Archivo 3 (Burbuja)");
                     opcion2 = scanner.nextInt();
 
                     switch (opcion2) {
@@ -63,7 +74,7 @@ public class AplOrdenamientoExterno {
                             System.out.println("¿Cuántos registros desea generar?");
                             numeroRegistros = scanner.nextInt();
                             if (generarArchivo(archivoIntercambio, numeroRegistros)) {
-                                System.out.println("¡El archivo de ha generado exitosamente!");
+                                System.out.println("\n¡El archivo de ha generado exitosamente!");
                             } else {
                                 System.out.println("ERROR: Archivo no generado.");
                             }
@@ -72,7 +83,16 @@ public class AplOrdenamientoExterno {
                             System.out.println("¿Cuántos registros desea generar?");
                             numeroRegistros = scanner.nextInt();
                             if (generarArchivo(archivoQuicksort, numeroRegistros)) {
-                                System.out.println("¡El archivo de ha generado exitosamente!");
+                                System.out.println("\n¡El archivo de ha generado exitosamente!");
+                            } else {
+                                System.out.println("ERROR: Archivo no generado.");
+                            }
+                            break;
+                        case 3: // 3. Archivo 3 (Burbuja)
+                            System.out.println("¿Cuántos registros desea generar?");
+                            numeroRegistros = scanner.nextInt();
+                            if (generarArchivo(archivoBurbuja, numeroRegistros)) {
+                                System.out.println("\n¡El archivo se ha generado exitosamente!");
                             } else {
                                 System.out.println("ERROR: Archivo no generado.");
                             }
@@ -85,19 +105,35 @@ public class AplOrdenamientoExterno {
                 case 2: // 2. Ordenar archivo
                     System.out.println("\n¿Qué archivo desea ordenar?"
                             + "\n1. Archivo 1 (Intercambio)"
-                            + "\n2. Archivo 2 (Quicksort)");
+                            + "\n2. Archivo 2 (Quicksort)"
+                            + "\n3. Archivo 3 (Burbuja)");
                     opcion2 = scanner.nextInt();
+                    System.out.println();
                     switch (opcion2) {
                         case 1: // 1. Archivo 1 (Intercambio)
+                            if (lengthArchivo(archivoIntercambio) == 0) {
+                                System.out.println("El archivo se encuentra vacío. Primero genere registros e intentelo de nuevo.");
+                                break;
+                            }
                             ordenamientoIntercambio(archivoIntercambio);
-                            System.out.println("¡El archivo ha sido ordenado por el método de intercambio exitosamente!");
+                            System.out.println("¡El archivo ha sido ordenado por el método de Intercambio exitosamente!");
                             break;
                         case 2: // 2. Archivo 2 (Quicksort)
+                            if (lengthArchivo(archivoQuicksort) == 0) {
+                                System.out.println("El archivo se encuentra vacío. Primero genere registros e intentelo de nuevo.");
+                                break;
+                            }
                             ordenamientoQuicksort(archivoQuicksort, 0, lengthArchivo(archivoQuicksort) - 1);
                             System.out.println("¡El archivo ha sido ordenado por el método de Quicksort exitosamente!");
                             break;
-                        case 3: // TODO: Burbuja
-
+                        case 3: // 3. Archivo 3 (Burbuja)
+                            if (lengthArchivo(archivoBurbuja) == 0) {
+                                System.out.println("El archivo se encuentra vacío. Primero genere registros e intentelo de nuevo.");
+                                break;
+                            }
+                            ordenamientoBurbuja(archivoBurbuja);
+                            System.out.println("¡El archivo ha sido ordenado por el método de Burbuja exitosamente!");
+                            break;
                         default:
                             System.out.println("\nFavor de ingresar una opción del menú.");
                             break;
@@ -106,41 +142,65 @@ public class AplOrdenamientoExterno {
                 case 3: // 3. Imprimir archivo
                     System.out.println("\n¿Qué archivo desea imprimir?"
                             + "\n1. Archivo 1 (Intercambio)"
-                            + "\n2. Archivo 2 (Quicksort)");
+                            + "\n2. Archivo 2 (Quicksort)"
+                            + "\n3. Archivo 3 (Burbuja)");
                     opcion2 = scanner.nextInt();
+                    System.out.println();
                     switch (opcion2) {
                         case 1: // 1. Archivo 1 (Intercambio)
+                            if (lengthArchivo(archivoIntercambio) == 0) {
+                                System.out.println("El archivo está vacío. No contiene ningún registro.");
+                                break;
+                            }
                             imprimirArchivo(archivoIntercambio);
                             break;
                         case 2: // 2. Archivo 2 (Quicksort)
+                            if (lengthArchivo(archivoQuicksort) == 0) {
+                                System.out.println("El archivo está vacío. No contiene ningún registro.");
+                                break;
+                            }
                             imprimirArchivo(archivoQuicksort);
+                            break;
+                        case 3: // 3. Archivo 3 (Burbuja)
+                            if (lengthArchivo(archivoBurbuja) == 0) {
+                                System.out.println("El archivo está vacío. No contiene ningún registro.");
+                                break;
+                            }
+                            imprimirArchivo(archivoBurbuja);
                             break;
                         default:
                             System.out.println("\nFavor de ingresar una opción del menú.");
                             break;
                     }
                     break;
-                case 4: // Limpiar registros
+                case 4: // 4. Limpiar registros
                     System.out.println("\n¿Qué archivo desea limpiar?"
                             + "\n1. Archivo 1 (Intercambio)"
-                            + "\n2. Archivo 2 (Quicksort)");
+                            + "\n2. Archivo 2 (Quicksort)"
+                            + "\n3. Archivo 3 (Burbuja)");
                     opcion2 = scanner.nextInt();
+                    System.out.println();
                     switch (opcion2) {
                         case 1: // 1. Archivo 1 (Intercambio)
                             archivoIntercambio.setLength(0);
-                            System.out.println("\nSe han limpiado los registros del archivo " + archivo1.getName() + " correctamente.");
+                            System.out.println("Se han limpiado los registros del archivo " + archivo1.getName() + " correctamente.");
                             break;
                         case 2: // 2. Archivo 2 (Quicksort)
                             archivoQuicksort.setLength(0);
-                            System.out.println("\nSe han limpiado los registros del archivo " + archivo2.getName() + " correctamente.");
+                            System.out.println("Se han limpiado los registros del archivo " + archivo2.getName() + " correctamente.");
+                            break;
+                        case 3: // 3. Archivo 3 (Burbuja)
+                            archivoBurbuja.setLength(0);
+                            System.out.println("Se han limpiado los registros del archivo " + archivo3.getName() + " correctamente.");
                             break;
                         default:
                             System.out.println("\nFavor de ingresar una opción del menú.");
                             break;
-                        case 5: // Salir
-                            System.out.println("\nHa finalizado el programa correctamente.");
-                            break;
                     }
+                    break;
+                case 5: // 5. Salir
+                    System.out.println("\nHa finalizado el programa correctamente.");
+                    break;
                 default:
                     System.out.println("\nFavor de ingresar una opción del menú.");
                     break;
@@ -282,6 +342,43 @@ public class AplOrdenamientoExterno {
             }
             if (der > i) {
                 ordenamientoQuicksort(archivo, i, der);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+    }
+
+    public static void ordenamientoBurbuja(RandomAccessFile archivo) {
+        Producto productoI, productoJ;
+        try {
+            int i;
+            int superior = lengthArchivo(archivo);
+            boolean bandera = true;
+            while (bandera) {
+                bandera = false;
+                superior--;
+                for (i = 0; i < superior; i++) {
+                    archivo.seek(i * VALOR_RENGLON);
+                    productoI = new Producto(archivo.readInt(), archivo.readUTF(), archivo.readInt());
+                    // Como aplicar i+1, ya que como leí se quedo apuntando al inicio del siguiente
+                    productoJ = new Producto(archivo.readInt(), archivo.readUTF(), archivo.readInt());
+                    if (productoI.toString().compareTo(productoJ.toString()) > 0) {
+                        // Me posiciono en i
+                        archivo.seek(i * VALOR_RENGLON);
+                        archivo.writeInt(productoJ.idProducto);
+                        archivo.writeUTF((productoJ.nombreProducto));
+                        archivo.writeInt(productoJ.existencia);
+
+                        // Ya escribió en todo i, entonces este apuntador será la siguiente línea (i+1)
+                        archivo.writeInt(productoI.idProducto);
+                        archivo.writeUTF(productoI.nombreProducto);
+                        archivo.writeInt(productoI.existencia);
+
+                        bandera = true;
+                    }
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
