@@ -1,3 +1,5 @@
+package ordenamientoexterno;
+
 
 /**
  *
@@ -21,8 +23,7 @@ public class Producto {
     
     // nombreProducto para ordenarlo por nombre primero
     public String toString() {
-        return Rutinas.PonBlancos(nombreProducto, 20) + Rutinas.PonCeros(idProducto, 10) + Rutinas.PonCeros(existencia, 10); 
-        // Longitud fija, 20.
+        return Rutinas.PonBlancos(nombreProducto, 30) + Rutinas.PonCeros(idProducto, 5) + Rutinas.PonCeros(existencia, 5); 
     }
     
     
